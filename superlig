@@ -6,14 +6,14 @@ int main()
 {
 
    FILE  *open;
-   char takim[10];
+   char takim;
    open=fopen("takimlar.txt","r");
 
    do{
 
-   takim[10]=getc(open);
+   takim=getc(open);
 
-   printf("%c",takim[10]);
+   printf("%c",takim);
    }
 
    while(takim!=EOF);
