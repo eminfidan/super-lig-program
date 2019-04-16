@@ -1,0 +1,24 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+
+int main()
+{
+
+   FILE  *open;
+   char takim[10];
+   open=fopen("takimlar.txt","r");
+
+   do{
+
+   takim[10]=getc(open);
+
+   printf("%c",takim[10]);
+   }
+
+   while(takim!=EOF);
+
+   fclose(open);
+
+return 0;
+}
