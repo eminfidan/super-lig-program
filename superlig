@@ -3,11 +3,23 @@
 struct teams
 {
     char a[100];
+    long long int play;
+    long long int win;
+    long long int draw;
+    long long int lose;
+    long long int ag;
+    long long int yg;
+    long long int average;
+    long long int point;
 };
 
 struct teams cur_team[100];
 
-int main(void) {
+int main(int argc, char* argv[]) {
+    printf("**TURKIYE SANAL SUPER LIGI**\n");
+    printf("------- ----- ----- -------\n");
+    printf("             O G B M A Y A P\n");
+
     FILE *myfile = fopen("Members.txt", "r");
     char ch;
     int count = 0;
@@ -24,7 +36,7 @@ int main(void) {
         int i;
         for (i = 0; i <= count; i++) {
 
-        fscanf(myfile, "%s", cur_team[i].a);
+        fscanf(myfile, "%s %lld %lld %lld %lld %lld %lld %lld %lld ", cur_team[i].a,&cur_team[i].play,&cur_team[i].win,&cur_team[i].draw,&cur_team[i].lose,&cur_team[i].ag,&cur_team[i].yg,&cur_team[i].average,&cur_team[i].point);
 
         }
         A=&cur_team[0].a;
@@ -38,7 +50,11 @@ int main(void) {
         I=&cur_team[8].a;
         J=&cur_team[9].a;
 
-
+        int k;
+        for (k=0; k<10; k++)
+        {
+        printf("%s %lld %lld %lld %lld %lld %lld %lld %lld\n",cur_team[k].a, cur_team[k].play, cur_team[k].win, cur_team[k].draw, cur_team[k].lose, cur_team[k].ag, cur_team[k].yg, cur_team[k].average, cur_team[k].point);
+        }
 return 0;
     }
 
