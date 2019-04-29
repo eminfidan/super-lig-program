@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 struct teams
 {
@@ -12,31 +13,96 @@ struct teams
     long long int average;
     long long int point;
 };
-
 struct teams cur_team[100];
 
+void swap_teams(int j, int i){
+    struct teams temp;
+    strcpy(temp.a,cur_team[j].a);
+    temp.play=cur_team[j].play;
+    temp.win= cur_team[j].win;
+    temp.draw= cur_team[j].draw;
+    temp.lose=cur_team[j].lose;
+    temp.ag= cur_team[j].ag;
+    temp.yg= cur_team[j].yg;
+    temp.average= cur_team[j].average;
+    temp.point=cur_team[j].point;
+    strcpy(cur_team[j].a,cur_team[i].a);
+    cur_team[j].play= cur_team[i].play;
+    cur_team[j].win= cur_team[i].win;
+    cur_team[j].draw= cur_team[i].draw;
+    cur_team[j].lose= cur_team[i].lose;
+    cur_team[j].ag= cur_team[i].ag;
+    cur_team[j].yg= cur_team[i].yg;
+    cur_team[j].average= cur_team[i].average;
+    cur_team[j].point=cur_team[i].point;
+    strcpy(cur_team[i].a,temp.a);
+    cur_team[i].play= temp.play;
+    cur_team[i].win= temp.win;
+    cur_team[i].draw= temp.draw;
+    cur_team[i].lose= temp.lose;
+    cur_team[i].ag= temp.ag;
+    cur_team[i].yg= temp.yg;
+    cur_team[i].average= temp.average;
+    cur_team[i].point=temp.point;
+}
+
+void takim_sirala(){
+
+    for(int r=0;r<10;r++){
+        for (int i=0;i<9;i++){
+            if(cur_team[i+1].point>cur_team[i].point)
+                {
+                    swap_teams(i,i+1);
+                }
+        }
+    }
+   return;
+}
 int main(int argc, char* argv[]) {
+
+    char takimbir,takimiki;
+    int skor1,skor2,averaji,averajk;
+    int sayi;
+    int puansiralamasi[10];
+    char takimsiralamasi[10];
+    int takimaveraji[10];
+
+    int win_point;
+    int lose_point;
+    int team_number;
+    int draw_point;
+
+        printf("mac sonucunu giriniz: ");
+        scanf("%c %d %c %d",&takimbir,&skor1,&takimiki,&skor2);
+
+
+
+    FILE *settings = fopen("ayarlar.txt","r");
+    fscanf(settings,"%d \n %d \n %d \n %d",&team_number,&win_point,&draw_point,&lose_point);
+    fclose(settings);
+
     printf("**TURKIYE SANAL SUPER LIGI**\n");
     printf("------- ----- ----- -------\n");
     printf("             O G B M A Y A P\n");
 
-    FILE *myfile = fopen("Members.txt", "r");
-    char ch;
+    FILE *myteams = fopen("Teams.txt", "r");
+
+    char nl;
     int count = 0;
 
         do{
-		ch = fgetc(myfile);
-        if (ch == '\n') count++;
+		nl = fgetc(myteams);
+        if (nl == '\n') count++;
         }
-        while (ch != EOF);
+        while (nl != EOF);
 
     char *A,*B,*C,*D,*E,*F,*G,*H,*I,*J;
 
-	rewind(myfile);
+	rewind(myteams);
         int i;
         for (i = 0; i <= count; i++) {
 
-        fscanf(myfile, "%s %lld %lld %lld %lld %lld %lld %lld %lld ", cur_team[i].a,&cur_team[i].play,&cur_team[i].win,&cur_team[i].draw,&cur_team[i].lose,&cur_team[i].ag,&cur_team[i].yg,&cur_team[i].average,&cur_team[i].point);
+        fscanf(myteams, "%s %lld %lld %lld %lld %lld %lld %lld %lld ", cur_team[i].a,&cur_team[i].play,&cur_team[i].win,&cur_team[i].draw,&cur_team[i].lose,&cur_team[i].ag,&cur_team[i].yg,&cur_team[i].average,&cur_team[i].point);
 
         }
         A=&cur_team[0].a;
@@ -50,11 +116,140 @@ int main(int argc, char* argv[]) {
         I=&cur_team[8].a;
         J=&cur_team[9].a;
 
+
+
+    switch(takimbir){
+        case'A':
+            takimbir=0;
+            break;
+        case'B':
+            takimbir=1;
+            break;
+        case'C':
+            takimbir=2;
+            break;
+        case'D':
+            takimbir=3;
+            break;
+        case'E':
+            takimbir=4;
+            break;
+        case'F':
+            takimbir=5;
+            break;
+        case'G':
+            takimbir=6;
+            break;
+        case'H':
+            takimbir=7;
+            break;
+        case'I':
+            takimbir=8;
+            break;
+        case'J':
+            takimbir=9;
+            break;
+    }
+
+    switch(takimiki){
+        case'A':
+            takimiki=0;
+            break;
+        case'B':
+            takimiki=1;
+            break;
+        case'C':
+            takimiki=2;
+            break;
+        case'D':
+            takimiki=3;
+            break;
+        case'E':
+            takimiki=4;
+            break;
+        case'F':
+            takimiki=5;
+            break;
+        case'G':
+            takimiki=6;
+            break;
+        case'H':
+            takimbir=7;
+            break;
+        case'I':
+            takimiki=8;
+            break;
+        case'J':
+            takimiki=9;
+            break;
+    }
+
+        if(skor1>skor2)
+    {
+    cur_team[takimbir].play +=1;
+    cur_team[takimiki].play +=1;
+    cur_team[takimbir].win +=1;
+    cur_team[takimiki].lose+=1;
+    cur_team[takimbir].ag+=skor1;
+    cur_team[takimbir].yg+=skor2;
+    cur_team[takimiki].ag+=skor2;
+    cur_team[takimiki].yg+=skor1;
+      averaji=skor1-skor2;
+    cur_team[takimbir].average+=averaji;
+      averajk=skor2-skor1;
+    cur_team[takimiki].average+=averajk;
+    cur_team[takimbir].point+=win_point;
+    cur_team[takimiki].point+=lose_point;
+
+    }
+
+        else if(skor2>skor1)
+    {
+    cur_team[takimbir].play +=1;
+    cur_team[takimiki].play +=1;
+    cur_team[takimbir].lose +=1;
+    cur_team[takimiki].win+=1;
+    cur_team[takimbir].ag+=skor1;
+    cur_team[takimbir].yg+=skor2;
+    cur_team[takimiki].ag+=skor2;
+    cur_team[takimiki].yg+=skor1;
+     averaji=skor1-skor2;
+    cur_team[takimbir].average+=averaji;
+     averajk=skor2-skor1;
+    cur_team[takimiki].average+=averajk;
+    cur_team[takimbir].point+=lose_point;
+    cur_team[takimiki].point+=win_point;
+
+    }
+
+        else if(skor1=skor2)
+    {
+    cur_team[takimbir].play +=1;
+    cur_team[takimiki].play +=1;
+    cur_team[takimbir].draw +=1;
+    cur_team[takimiki].draw +=1;
+    cur_team[takimbir].ag+=skor1;
+    cur_team[takimbir].yg+=skor2;
+    cur_team[takimiki].ag+=skor2;
+    cur_team[takimiki].yg+=skor1;
+    cur_team[takimbir].point+=draw_point;
+    cur_team[takimiki].point+=draw_point;
+    }
+
+
+
+
+
+     takim_sirala();
+
         int k;
         for (k=0; k<10; k++)
         {
         printf("%s %lld %lld %lld %lld %lld %lld %lld %lld\n",cur_team[k].a, cur_team[k].play, cur_team[k].win, cur_team[k].draw, cur_team[k].lose, cur_team[k].ag, cur_team[k].yg, cur_team[k].average, cur_team[k].point);
         }
+
+
+
+
 return 0;
     }
-
