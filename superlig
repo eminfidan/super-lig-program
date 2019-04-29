@@ -1,255 +1,272 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-struct teams
-{
-    char a[100];
-    long long int play;
-    long long int win;
-    long long int draw;
-    long long int lose;
-    long long int ag;
-    long long int yg;
-    long long int average;
-    long long int point;
-};
-struct teams cur_team[100];
+typedef struct team team;
+typedef struct mac mac;
 
-void swap_teams(int j, int i){
-    struct teams temp;
-    strcpy(temp.a,cur_team[j].a);
-    temp.play=cur_team[j].play;
-    temp.win= cur_team[j].win;
-    temp.draw= cur_team[j].draw;
-    temp.lose=cur_team[j].lose;
-    temp.ag= cur_team[j].ag;
-    temp.yg= cur_team[j].yg;
-    temp.average= cur_team[j].average;
-    temp.point=cur_team[j].point;
-    strcpy(cur_team[j].a,cur_team[i].a);
-    cur_team[j].play= cur_team[i].play;
-    cur_team[j].win= cur_team[i].win;
-    cur_team[j].draw= cur_team[i].draw;
-    cur_team[j].lose= cur_team[i].lose;
-    cur_team[j].ag= cur_team[i].ag;
-    cur_team[j].yg= cur_team[i].yg;
-    cur_team[j].average= cur_team[i].average;
-    cur_team[j].point=cur_team[i].point;
-    strcpy(cur_team[i].a,temp.a);
-    cur_team[i].play= temp.play;
-    cur_team[i].win= temp.win;
-    cur_team[i].draw= temp.draw;
-    cur_team[i].lose= temp.lose;
-    cur_team[i].ag= temp.ag;
-    cur_team[i].yg= temp.yg;
-    cur_team[i].average= temp.average;
-    cur_team[i].point=temp.point;
+struct team
+{
+    char name[12];
+    int play;
+    int win;
+    int draw;
+    int lose;
+    int ag;
+    int yg;
+    int average;
+    int point;
+    int isPlayed[100];
+};
+
+struct settings
+{
+    int wPoint;
+    int lPoint;
+    int teamNo;
+    int dPoint;
+} setting;
+
+struct mac
+{
+    char home;
+    char enemy;
+    int homeScore;
+    int enemyScore;
+};
+
+team teams[100] = {"Init", 0, 0, 0, 0, 0, 0, 0, 0, {0}};
+int teamCount = 0;
+
+void swapTeams(team *A, team *B){
+    team temp = *A;
+    *A = *B;
+    *B = temp;
 }
 
-void takim_sirala(){
-
-    for(int r=0;r<10;r++){
-        for (int i=0;i<9;i++){
-            if(cur_team[i+1].point>cur_team[i].point)
-                {
-                    swap_teams(i,i+1);
-                }
+void orderTeams()
+{
+    /*
+        nasıl sıralama yaparsın:
+        alttaki kodu x adet farklı if döngüsüne al
+    */
+    for (int i = 0; i < teamCount; i++)
+    {
+        for (int j = 0; j < teamCount - 1; j++)
+        {
+            if (teams[j + 1].point > teams[j].point)
+            {
+                swapTeams(&teams[j], &teams[j+1]);
+            }
         }
     }
-   return;
 }
-int main(int argc, char* argv[]) {
 
-    char takimbir,takimiki;
-    int skor1,skor2,averaji,averajk;
-    int sayi;
-    int puansiralamasi[10];
-    char takimsiralamasi[10];
-    int takimaveraji[10];
+void fetchTeams()
+{
+    FILE *file_Teams = fopen("takimlar.txt", "r");
+    char harf;
+    do
+    {
+        harf = fgetc(file_Teams);
+        if (harf == '\n')
+            teamCount++;
+    } while (harf != EOF);
 
-    int win_point;
-    int lose_point;
-    int team_number;
-    int draw_point;
+    rewind(file_Teams);
 
-        printf("mac sonucunu giriniz: ");
-        scanf("%c %d %c %d",&takimbir,&skor1,&takimiki,&skor2);
+    for (int i = 0; i < teamCount; i++)
+    {
+        fscanf(file_Teams, "%s", teams[i].name);
+    }
+
+    fclose(file_Teams);
+}
+
+void addScoreFromUser()
+{
+    mac Game;
+    printf("Macin sonucunu giriniz. ex: A 3 B 2\n");
+    scanf("%c %d %c %d", &Game.home, &Game.homeScore, &Game.enemy, &Game.enemyScore);
+    getchar();
+
+    if (teams[Game.home - 65].isPlayed[Game.enemy - 65] == 1) {
+        printf("Bu takimlar arasinda mac oynamis!");
+        return;
+    } else {
+        teams[Game.home - 65].isPlayed[Game.enemy - 65] = 1;
+    }
+
+    FILE * _games = fopen("maclar1.txt", "a");
+    fprintf(_games, "%c %d %c %d\n", Game.home, Game.homeScore, Game.enemy, Game.enemyScore);
+    fclose(_games);
+
+    if (Game.home - 65 >= teamCount || Game.enemy - 65 >= teamCount)
+
+    teams[Game.home - 65].play += 1;
+    teams[Game.enemy - 65].play += 1;
+
+    // takımların atılan yenilen golleri
+    teams[Game.home - 65].ag += Game.homeScore;
+    teams[Game.home - 65].yg += Game.enemyScore;
+
+    teams[Game.enemy - 65].ag += Game.enemyScore;
+    teams[Game.enemy - 65].yg += Game.homeScore;
+
+    // averaj
+    teams[Game.home - 65].average += (Game.homeScore - Game.enemyScore);
+    teams[Game.enemy - 65].average += (Game.enemyScore - Game.homeScore);
+
+    if (Game.homeScore > Game.enemyScore)
+    {
+        // win lose arttır
+        teams[Game.home - 65].win += 1;
+        teams[Game.enemy - 65].lose += 1;
+
+        // puanla
+        teams[Game.home - 65].point += setting.wPoint;
+        teams[Game.enemy - 65].point += setting.lPoint;
+    } else if (Game.homeScore < Game.enemyScore)
+    {
+        teams[Game.home - 65].lose += 1;
+        teams[Game.enemy - 65].win += 1;
+
+        // puanla
+        teams[Game.home - 65].point += setting.lPoint;
+        teams[Game.enemy - 65].point += setting.wPoint;
+    } else
+    {
+        teams[Game.home - 65].draw += 1;
+        teams[Game.enemy - 65].draw += 1;
+
+        // puanla
+        teams[Game.home - 65].point += setting.dPoint;
+        teams[Game.enemy - 65].point += setting.dPoint;
+    }
+}
+
+void fetchGames()
+{
+    mac Game;
+    FILE *games = fopen("maclar1.txt", "r+");
+
+    int macSayisi = 0;
+
+    char harf;
+    do
+    {
+        harf = fgetc(games);
+        if (harf == '\n')
+            macSayisi++;
+    } while (harf != EOF);
+
+    rewind(games);
+
+    for (int i = 0; i < macSayisi; i++)
+    {
+        fscanf(games, "%c %d %c %d\n", &Game.home, &Game.homeScore, &Game.enemy, &Game.enemyScore);
+
+        if (teams[Game.home - 65].isPlayed[Game.enemy - 65] == 1) {
+            printf("Bu takimlar arasinda mac oynamis!");
+            continue;
+        } else {
+            teams[Game.home - 65].isPlayed[Game.enemy - 65] = 1;
+        }
+
+        teams[Game.home - 65].play += 1;
+        teams[Game.enemy - 65].play += 1;
+
+        // takımların atılan yenilen golleri
+        teams[Game.home - 65].ag += Game.homeScore;
+        teams[Game.home - 65].yg += Game.enemyScore;
+
+        teams[Game.enemy - 65].ag += Game.enemyScore;
+        teams[Game.enemy - 65].yg += Game.homeScore;
+
+        // averaj
+        teams[Game.home - 65].average += (Game.homeScore - Game.enemyScore);
+        teams[Game.enemy - 65].average += (Game.enemyScore - Game.homeScore);
+
+        if (Game.homeScore > Game.enemyScore)
+        {
+            // win lose arttır
+            teams[Game.home - 65].win += 1;
+            teams[Game.enemy - 65].lose += 1;
+
+            // puanla
+            teams[Game.home - 65].point += setting.wPoint;
+            teams[Game.enemy - 65].point += setting.lPoint;
+        } else if (Game.homeScore < Game.enemyScore)
+        {
+            // win lose arttır
+            teams[Game.home - 65].lose += 1;
+            teams[Game.enemy - 65].win += 1;
+
+            // puanla
+            teams[Game.home - 65].point += setting.lPoint;
+            teams[Game.enemy - 65].point += setting.wPoint;
+        } else
+        {
+            // win lose arttır
+            teams[Game.home - 65].draw += 1;
+            teams[Game.enemy - 65].draw += 1;
+
+            // puanla
+            teams[Game.home - 65].point += setting.dPoint;
+            teams[Game.enemy - 65].point += setting.dPoint;
+        }
+    }
+    fclose(games);
+}
+
+void showScoreTable() {
+    printf("TURKIYE SANAL SUPER LIGI \n");
+    printf("             O  G  M  B  AG  YG  A  P\n");
+
+    orderTeams();
+
+    for (int i = 0; i < teamCount; i++) {
+        printf("%s %d %d %d %d %d %d %d %d\n", teams[i].name, teams[i].play, teams[i].win, teams[i].lose,
+                                             teams[i].draw, teams[i].ag, teams[i].yg,
+                                             teams[i].average, teams[i].point);
+    }
+}
 
 
-
-    FILE *settings = fopen("ayarlar.txt","r");
-    fscanf(settings,"%d \n %d \n %d \n %d",&team_number,&win_point,&draw_point,&lose_point);
+int main()
+{
+    FILE *settings = fopen("ayarlar.txt", "r");
+    fscanf(settings, "%d \n %d \n %d \n %d", &setting.teamNo, &setting.wPoint, &setting.dPoint, &setting.lPoint);
     fclose(settings);
 
-    printf("**TURKIYE SANAL SUPER LIGI**\n");
-    printf("------- ----- ----- -------\n");
-    printf("             O G B M A Y A P\n");
+    fetchTeams();
+    fetchGames();
 
-    FILE *myteams = fopen("Teams.txt", "r");
+    int selection = 1;
+    char tryagain = 'h';
 
-    char nl;
-    int count = 0;
+    do {
+        printf("Takimlar \n");
+        printf("(1) Mac ekle \n");
+        printf("(2) Puan durumu \n");
+        scanf("%d", &selection);
+        getchar();
 
-        do{
-		nl = fgetc(myteams);
-        if (nl == '\n') count++;
-        }
-        while (nl != EOF);
-
-    char *A,*B,*C,*D,*E,*F,*G,*H,*I,*J;
-
-	rewind(myteams);
-        int i;
-        for (i = 0; i <= count; i++) {
-
-        fscanf(myteams, "%s %lld %lld %lld %lld %lld %lld %lld %lld ", cur_team[i].a,&cur_team[i].play,&cur_team[i].win,&cur_team[i].draw,&cur_team[i].lose,&cur_team[i].ag,&cur_team[i].yg,&cur_team[i].average,&cur_team[i].point);
-
-        }
-        A=&cur_team[0].a;
-        B=&cur_team[1].a;
-        C=&cur_team[2].a;
-        D=&cur_team[3].a;
-        E=&cur_team[4].a;
-        F=&cur_team[5].a;
-        G=&cur_team[6].a;
-        H=&cur_team[7].a;
-        I=&cur_team[8].a;
-        J=&cur_team[9].a;
-
-
-
-    switch(takimbir){
-        case'A':
-            takimbir=0;
-            break;
-        case'B':
-            takimbir=1;
-            break;
-        case'C':
-            takimbir=2;
-            break;
-        case'D':
-            takimbir=3;
-            break;
-        case'E':
-            takimbir=4;
-            break;
-        case'F':
-            takimbir=5;
-            break;
-        case'G':
-            takimbir=6;
-            break;
-        case'H':
-            takimbir=7;
-            break;
-        case'I':
-            takimbir=8;
-            break;
-        case'J':
-            takimbir=9;
-            break;
-    }
-
-    switch(takimiki){
-        case'A':
-            takimiki=0;
-            break;
-        case'B':
-            takimiki=1;
-            break;
-        case'C':
-            takimiki=2;
-            break;
-        case'D':
-            takimiki=3;
-            break;
-        case'E':
-            takimiki=4;
-            break;
-        case'F':
-            takimiki=5;
-            break;
-        case'G':
-            takimiki=6;
-            break;
-        case'H':
-            takimbir=7;
-            break;
-        case'I':
-            takimiki=8;
-            break;
-        case'J':
-            takimiki=9;
-            break;
-    }
-
-        if(skor1>skor2)
-    {
-    cur_team[takimbir].play +=1;
-    cur_team[takimiki].play +=1;
-    cur_team[takimbir].win +=1;
-    cur_team[takimiki].lose+=1;
-    cur_team[takimbir].ag+=skor1;
-    cur_team[takimbir].yg+=skor2;
-    cur_team[takimiki].ag+=skor2;
-    cur_team[takimiki].yg+=skor1;
-      averaji=skor1-skor2;
-    cur_team[takimbir].average+=averaji;
-      averajk=skor2-skor1;
-    cur_team[takimiki].average+=averajk;
-    cur_team[takimbir].point+=win_point;
-    cur_team[takimiki].point+=lose_point;
-
-    }
-
-        else if(skor2>skor1)
-    {
-    cur_team[takimbir].play +=1;
-    cur_team[takimiki].play +=1;
-    cur_team[takimbir].lose +=1;
-    cur_team[takimiki].win+=1;
-    cur_team[takimbir].ag+=skor1;
-    cur_team[takimbir].yg+=skor2;
-    cur_team[takimiki].ag+=skor2;
-    cur_team[takimiki].yg+=skor1;
-     averaji=skor1-skor2;
-    cur_team[takimbir].average+=averaji;
-     averajk=skor2-skor1;
-    cur_team[takimiki].average+=averajk;
-    cur_team[takimbir].point+=lose_point;
-    cur_team[takimiki].point+=win_point;
-
-    }
-
-        else if(skor1=skor2)
-    {
-    cur_team[takimbir].play +=1;
-    cur_team[takimiki].play +=1;
-    cur_team[takimbir].draw +=1;
-    cur_team[takimiki].draw +=1;
-    cur_team[takimbir].ag+=skor1;
-    cur_team[takimbir].yg+=skor2;
-    cur_team[takimiki].ag+=skor2;
-    cur_team[takimiki].yg+=skor1;
-    cur_team[takimbir].point+=draw_point;
-    cur_team[takimiki].point+=draw_point;
-    }
-
-
-
-
-
-     takim_sirala();
-
-        int k;
-        for (k=0; k<10; k++)
-        {
-        printf("%s %lld %lld %lld %lld %lld %lld %lld %lld\n",cur_team[k].a, cur_team[k].play, cur_team[k].win, cur_team[k].draw, cur_team[k].lose, cur_team[k].ag, cur_team[k].yg, cur_team[k].average, cur_team[k].point);
+        switch(selection) {
+            case 1:
+                addScoreFromUser();
+                break;
+            case 2:
+                showScoreTable();
+                exit(EXIT_SUCCESS);
+                break;
+            default:
+                exit(EXIT_SUCCESS);
         }
 
+        printf("\n Devam etmek istiyor musunuz? e/h \n");
+        scanf(" %c", &tryagain);
 
+    } while (tryagain == 'e');
 
-
-return 0;
-    }
+    return 0;
+}
