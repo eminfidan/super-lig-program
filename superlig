@@ -96,7 +96,7 @@ void addScoreFromUser()
         teams[Game.home - 65].isPlayed[Game.enemy - 65] = 1;
     }
 
-    FILE * _games = fopen("maclar1.txt", "a");
+    FILE * _games = fopen("maclar.txt", "a");
     fprintf(_games, "%c %d %c %d\n", Game.home, Game.homeScore, Game.enemy, Game.enemyScore);
     fclose(_games);
 
@@ -220,7 +220,7 @@ void fetchGames()
 
 void showScoreTable() {
     printf("TURKIYE SANAL SUPER LIGI \n");
-    printf("             O  G  M  B  AG  YG  A  P\n");
+    printf("             O G M B AG YG A P\n");
 
     orderTeams();
 
@@ -245,7 +245,7 @@ int main()
     char tryagain = 'h';
 
     do {
-        printf("Takimlar \n");
+        printf("Secim Yapiniz... \n");
         printf("(1) Mac ekle \n");
         printf("(2) Puan durumu \n");
         scanf("%d", &selection);
@@ -263,10 +263,10 @@ int main()
                 exit(EXIT_SUCCESS);
         }
 
-        printf("\n Devam etmek istiyor musunuz? e/h \n");
+        printf("\n Devam etmek istiyor musunuz? e/E\||h/H \n");
         scanf(" %c", &tryagain);
 
-    } while (tryagain == 'e');
+    } while (tryagain == 'e','E');
 
     return 0;
 }
