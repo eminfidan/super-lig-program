@@ -1,12 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+
+// struct yapisinin kullanim kolayligi saglandi
 typedef struct team team;
 typedef struct mac mac;
 
+// puan tablosunda gosterilecek degiskenler struct yapisinda tanimlandi
 struct team
 {
-    char name[12];
+    char name[13];
     int play;
     int win;
     int draw;
@@ -18,6 +21,7 @@ struct team
     int isPlayed[100];
 };
 
+// ayarlar.txt dosyasinin degiskenleri struct yapisinda tanimlandi
 struct settings
 {
     int wPoint;
@@ -26,6 +30,7 @@ struct settings
     int dPoint;
 } setting;
 
+// skor girisinde lazim olan degiskenler struct yapisinda tanimlandi
 struct mac
 {
     char home;
@@ -34,21 +39,20 @@ struct mac
     int enemyScore;
 };
 
+// puan  tablosundaki degerler tum takimlar icin sifirlandi
 team teams[100] = {"Init", 0, 0, 0, 0, 0, 0, 0, 0, {0}};
-int teamCount = 0;
+int teamCount = +1;
 
+// takimlari siralayan fonksiyonlar yazildi
 void swapTeams(team *A, team *B){
     team temp = *A;
     *A = *B;
     *B = temp;
 }
 
+// puanlari yuksekten alcaga siralama
 void orderTeams()
 {
-    /*
-        nasıl sıralama yaparsın:
-        alttaki kodu x adet farklı if döngüsüne al
-    */
     for (int i = 0; i < teamCount; i++)
     {
         for (int j = 0; j < teamCount - 1; j++)
@@ -61,6 +65,66 @@ void orderTeams()
     }
 }
 
+
+
+void orderGoals()
+{
+    for (int i = 0; i < teamCount; i++)
+    {
+        for (int j = 0; j < teamCount - 1; j++)
+        {
+            if (teams[j + 1].ag > teams[j].ag)
+            {
+                swapTeams(&teams[j], &teams[j+1]);
+            }
+        }
+    }
+}
+
+
+
+
+// puanlari isme gore siralama
+void orderTeamNames()
+{
+
+    for (int i = 0; i < teamCount; i++)
+    {
+        for (int j = 0; j < teamCount - 1; j++)
+        {
+            int k=0;
+            while(teams[j].name[k]!='\0')
+            {
+                if(teams[j].name[k]==teams[i].name[k])
+                    k++;
+                else
+                    break;
+            }
+            if (teams[j].name[k] > teams[i].name[k])
+            {
+                swapTeams(&teams[j], &teams[i]);
+            }
+        }
+    }
+}
+
+
+//puanlari  alcaktan yuksege dogru siralama
+void orderTeamsInverse()
+{
+    for (int i = 0; i < teamCount; i++)
+    {
+        for (int j = 0; j < teamCount - 1; j++)
+        {
+            if (teams[j + 1].point < teams[j].point)
+            {
+                swapTeams(&teams[j], &teams[j+1]);
+            }
+        }
+    }
+}
+
+//takimlar.txt dosyasindan takim isimleri alindi
 void fetchTeams()
 {
     FILE *file_Teams = fopen("takimlar.txt", "r");
@@ -74,7 +138,7 @@ void fetchTeams()
 
     rewind(file_Teams);
 
-    for (int i = 0; i < teamCount; i++)
+    for (int i =0 ; i < teamCount; i++)
     {
         fscanf(file_Teams, "%s", teams[i].name);
     }
@@ -82,6 +146,23 @@ void fetchTeams()
     fclose(file_Teams);
 }
 
+// takimlarin isimlerini buyuk olacak sekilde yazma
+void capitalLetterTeams()
+{
+    for(int i=0; i<teamCount; i++)
+    {
+        int j=0;
+        while(teams[i].name[j]!='\0')
+        {
+            if(teams[i].name[j]>96)
+                teams[i].name[j]-=32;
+            j++;
+        }
+    }
+
+}
+
+//kullanicidan skor girisi alma
 void addScoreFromUser()
 {
     mac Game;
@@ -96,7 +177,7 @@ void addScoreFromUser()
         teams[Game.home - 65].isPlayed[Game.enemy - 65] = 1;
     }
 
-    FILE * _games = fopen("maclar.txt", "a");
+    FILE * _games = fopen("maclar1.txt", "a");
     fprintf(_games, "%c %d %c %d\n", Game.home, Game.homeScore, Game.enemy, Game.enemyScore);
     fclose(_games);
 
@@ -144,6 +225,7 @@ void addScoreFromUser()
     }
 }
 
+//maclar1.txt dosyasindan maclari okuma
 void fetchGames()
 {
     mac Game;
@@ -218,19 +300,77 @@ void fetchGames()
     fclose(games);
 }
 
+//skor tablosunu yuksekten alcaga gosterme
 void showScoreTable() {
     printf("TURKIYE SANAL SUPER LIGI \n");
-    printf("             O G M B AG YG A P\n");
+    printf("              O  G  M  B  AG  YG  AV    PU\n");
 
     orderTeams();
 
     for (int i = 0; i < teamCount; i++) {
-        printf("%s %d %d %d %d %d %d %d %d\n", teams[i].name, teams[i].play, teams[i].win, teams[i].lose,
+        printf("%s  %d  %d  %d  %d  %d   %d   %d\t%d\n", teams[i].name, teams[i].play, teams[i].win, teams[i].lose,
                                              teams[i].draw, teams[i].ag, teams[i].yg,
                                              teams[i].average, teams[i].point);
     }
 }
 
+
+
+void showScoreTableGoals() {
+    printf("TURKIYE SANAL SUPER LIGI \n");
+    printf("              O  G  M  B  AG  YG  AV    PU\n");
+
+    orderGoals();
+
+    for (int i = 0; i < teamCount; i++) {
+        printf("%s  %d  %d  %d  %d  %d   %d   %d\t%d\n", teams[i].name, teams[i].play, teams[i].win, teams[i].lose,
+                                             teams[i].draw, teams[i].ag, teams[i].yg,
+                                             teams[i].average, teams[i].point);
+    }
+}
+
+
+//skor tablosunu alcaktan yuksege sıralama
+void showScoreTableInverse() {
+    printf("TURKIYE SANAL SUPER LIGI \n");
+    printf("              O  G  M  B  AG  YG   AV   PU\n");
+
+    orderTeamsInverse();
+
+    for (int i = 0; i < teamCount; i++) {
+        printf("%s  %d  %d  %d  %d  %d   %d    %d\t%d\n", teams[i].name, teams[i].play, teams[i].win, teams[i].lose,
+                                             teams[i].draw, teams[i].ag, teams[i].yg,
+                                             teams[i].average, teams[i].point);
+    }
+}
+//skor tablosunda takim isimlerini buyuk yazdirma
+void showScoreTableCapital() {
+    printf("TURKIYE SANAL SUPER LIGI \n");
+    printf("              O  G  M  B  AG  YG  AV    PU\n");
+
+    orderTeams();
+    capitalLetterTeams();
+
+    for (int i = 0; i < teamCount; i++) {
+        printf("%s  %d  %d  %d  %d  %d   %d   %d\t%d\n", teams[i].name, teams[i].play, teams[i].win, teams[i].lose,
+                                             teams[i].draw, teams[i].ag, teams[i].yg,
+                                             teams[i].average, teams[i].point);
+    }
+}
+
+//skor tablosunu alfabetik sekilde siralama
+void showScoreTableAlphabetical() {
+    printf("TURKIYE SANAL SUPER LIGI \n");
+    printf("              O  G  M  B  AG  YG   A     P\n");
+
+    orderTeamNames();
+
+    for (int i = 0; i < teamCount; i++) {
+        printf("%s  %d  %d  %d  %d  %d   %d    %d \t %d\n", teams[i].name, teams[i].play, teams[i].win, teams[i].lose,
+                                             teams[i].draw, teams[i].ag, teams[i].yg,
+                                             teams[i].average, teams[i].point);
+    }
+}
 
 int main()
 {
@@ -244,10 +384,17 @@ int main()
     int selection = 1;
     char tryagain = 'h';
 
+//kullanicinin istegine gore secim yapan menu olusturuldu
     do {
-        printf("Secim Yapiniz... \n");
         printf("(1) Mac ekle \n");
-        printf("(2) Puan durumu \n");
+        printf("(2) Puan durumunu normal siralamak icin \n");
+        printf("(3) Puan durumunu tersten siralamak icin \n");
+        printf("(4) Puan durumunu buyuk harf seklinde siralamak icin \n");
+        printf("(5) Puan durumunu alfabetik siralamak icin \n");
+        printf("(6) Puan durumunu gole göre siralamak icin \n");
+
+
+
         scanf("%d", &selection);
         getchar();
 
@@ -259,14 +406,30 @@ int main()
                 showScoreTable();
                 exit(EXIT_SUCCESS);
                 break;
+            case 3:
+                showScoreTableInverse();
+                exit(EXIT_SUCCESS);
+                break;
+            case 4:
+                showScoreTableCapital();
+                exit(EXIT_SUCCESS);
+                break;
+            case 5:
+                showScoreTableAlphabetical();
+                exit(EXIT_SUCCESS);
+                break;
+            case 6:
+                showScoreTableGoals();
+                 exit(EXIT_SUCCESS);
+                break;
             default:
                 exit(EXIT_SUCCESS);
         }
 
-        printf("\n Devam etmek istiyor musunuz? e/E\||h/H \n");
+        printf("\n Devam etmek istiyor musunuz? e/h \n");
         scanf(" %c", &tryagain);
 
-    } while (tryagain == 'e','E');
+    } while (tryagain == 'e');
 
     return 0;
 }
